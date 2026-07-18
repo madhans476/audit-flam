@@ -82,3 +82,24 @@ Conclusion: normalize() is not a bug
 
 
 # Entry 6 - removed random.seed(), bcoz it not used
+
+
+
+## Entry 7 - second tokenizer - multi-lingual hf:microsoft/Phi-4-mini-instruct
+
+result:
+tokenizer: hf:microsoft/Phi-4-mini-instruct
+lang      fertility (tok/word)    tok/char
+------------------------------------------
+eng                       1.37       0.227
+hin                       1.72       0.341
+tam                       3.27       0.373
+kan                       2.93       0.399
+
+hin is 1.26x the fertility of eng (worse tokenization)
+tam is 2.39x the fertility of eng (worse tokenization)
+kan is 2.14x the fertility of eng (worse tokenization)
+
+vs gpt2's 5.50x/17.05x/13.87x
+
+Big finding: most of the "fertility gap" in REPORT_v0 is a property of gpt2's vocabulary (near-zero Indic training data), not an inherent property of the languages. This directly changes the A4 recommendation.
