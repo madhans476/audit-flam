@@ -50,7 +50,7 @@ Confirms: len(line) overcounts codepoints for Indic scripts, which had been *def
 
 
 
-## Entry 4 - Exp B: remove .lower() (fertility_v2.py)
+## Entry 4 - Exp 2: remove .lower() (fertility_v2.py)
 
 result:
 lang      fertility (tok/word)    tok/char
@@ -62,3 +62,23 @@ kan                      19.24       2.584
 
 eng fertility 1.39 -> 1.32 (drops when lowering removed); hin/tam/kan unchanged (0 diff).
 Confirms lower() only touches English, and it was slightly *narrowing* the reported hin/eng gap (5.50x→5.76x once removed) — a small, one-sided bias.
+
+
+
+## Entry 5 - Exp 3: remove NFC normalize (fertility_v3.py)
+
+result:
+
+lang      fertility (tok/word)    tok/char
+------------------------------------------
+eng                       1.39       0.230
+hin                       7.62       1.505
+tam                      23.66       2.677
+kan                      19.26       2.585
+
+Max diff ~0.1-0.2 across all langs — an order of magnitude smaller than Exp A/B.
+Conclusion: normalize() is not a bug
+
+
+
+# Entry 6 - removed random.seed(), bcoz it not used
