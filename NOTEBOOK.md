@@ -85,8 +85,8 @@ Conclusion: normalize() is not a bug
 
 
 
-## Entry 7 - second tokenizer - multi-lingual hf:microsoft/Phi-4-mini-instruct
-
+## Entry 7 - test: multi-ling second tokenizer - multi-lingual hf:microsoft/Phi-4-mini-instruct
+[Multilingual Tokenizer Leaderboard](https://huggingface.co/spaces/eduagarcia/multilingual-tokenizer-leaderboard)
 result:
 tokenizer: hf:microsoft/Phi-4-mini-instruct
 lang      fertility (tok/word)    tok/char
@@ -103,3 +103,37 @@ kan is 2.14x the fertility of eng (worse tokenization)
 vs gpt2's 5.50x/17.05x/13.87x
 
 Big finding: most of the "fertility gap" in REPORT_v0 is a property of gpt2's vocabulary (near-zero Indic training data), not an inherent property of the languages. This directly changes the A4 recommendation.
+
+
+## Entry 8 — corrected denominators (fertility_final.py), both tokenizers
+
+tokenizer: gpt2
+lang      fertility   tok/char   tok/byte   tok/sent
+----------------------------------------------------
+eng            1.32      0.219      0.219      25.53
+hin            7.63      2.266      0.592     187.93
+tam           23.66      4.159      0.993     384.90
+kan           19.24      3.962      0.973     348.10
+
+tokenizer: hf:microsoft/Phi-4-mini-instruct
+lang      fertility   tok/char   tok/byte   tok/sent
+----------------------------------------------------
+eng            1.35      0.224      0.224      26.07
+hin            1.73      0.513      0.135      41.43
+tam            3.27      0.579      0.139      53.23
+kan            2.93      0.610      0.151      53.13
+
+Ratios vs eng:
+              word-ratio   byte-ratio   sent-ratio(NSL/parity)
+Phi-4  hin       1.28         0.60          1.59
+Phi-4  tam       2.42         0.62          2.04
+Phi-4  kan       2.17         0.67          2.04
+gpt2   hin       5.78         2.70          7.36
+gpt2   tam      17.92         4.53         15.08
+gpt2   kan      14.58         4.44         13.64
+
+Surprise: byte-ratio is LOWER than word-ratio and sent-ratio for every language/tokenizer — including <1.0 for Phi-4 (Indic langs "beat" English on tok/byte). 
+
+Reason: Devanagari/Tamil/Kannada codepoints are 3 bytes each in UTF-8, Latin is 1 byte. So "bytes" isn't a script-agnostic proxy for "amount of content" — it systematically inflates the denominator for Indic scripts, which *masks* the true disparity rather than fixing it.
+Revising earlier assumption: byte-based isn't actually the best fair denominator here. Sentence-ratio (NSL/parity) is, since FLORES gives literal same-content parallel sentences — it's the only denominator that
+holds "amount of communicated content" constant instead of holding a script-dependent unit (word or byte) constant.
